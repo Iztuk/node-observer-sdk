@@ -1,0 +1,26 @@
+{
+  "name": "@Iztuk/observer-sdk",
+  "version": "1.0.0",
+  "description": "API Observer SDK for NodeJS",
+  "keywords": [
+    "API-Observer"
+  ],
+  "homepage": "https://github.com/Iztuk/node-observer-sdk#readme",
+  "bugs": {
+    "url": "https://github.com/Iztuk/node-observer-sdk/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Iztuk/node-observer-sdk.git"
+  },
+  "license": "ISC",
+  "author": "Iztuk",
+  "type": "commonjs",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "eslint": "^10.8.0"
+  }
+}
