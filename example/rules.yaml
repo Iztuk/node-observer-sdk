@@ -1,0 +1,148 @@
+rules:
+  request.path.failure_endpoint:
+    enabled: true
+    applies_to:
+      - request
+    type: path
+    description: Detects requests to the intentional failure endpoint.
+    match:
+      paths:
+        - /failure
+      methods:
+        - GET
+      patterns:
+        - target: path
+          pattern: "^/failure$"
+    finding:
+      title: Failure test endpoint requested
+      message: A request was sent to the intentional failure endpoint.
+
+  request.query.debug_enabled:
+    enabled: true
+    applies_to:
+      - request
+    type: query
+    description: Detects requests that enable debug mode through the query string.
+    match:
+      paths:
+        - "*"
+      methods:
+        - GET
+        - POST
+      query_params:
+        debug:
+          - "true"
+      patterns:
+        - target: query
+          name: debug
+          pattern: "^(?i:true)$"
+    finding:
+      title: Debug query parameter enabled
+      message: The request included debug=true in the query string.
+
+  request.query.sql_injection:
+    enabled: true
+    applies_to:
+      - request
+    type: query
+    description: Detects common SQL injection patterns in query parameters.
+    match:
+      paths:
+        - "*"
+      methods:
+        - GET
+        - POST
+      patterns:
+        - target: query
+          name: "*"
+          pattern: "(?i)(union\\s+select|or\\s+1\\s*=\\s*1|drop\\s+table|select\\s+.+\\s+from)"
+    finding:
+      title: Possible SQL injection query
+      message: A query parameter contained a pattern commonly associated with SQL injection.
+
+  request.header.suspicious_user_agent:
+    enabled: true
+    applies_to:
+      - request
+    type: header
+    description: Detects test and command-line user agents.
+    match:
+      paths:
+        - "*"
+      methods:
+        - GET
+        - POST
+      headers:
+        user-agent:
+          - curl
+          - wget
+      patterns:
+        - target: header
+          name: user-agent
+          pattern: "(?i)(curl|wget|python-requests|powershell)"
+    finding:
+      title: Command-line user agent detected
+      message: The request used a command-line or scripted HTTP client user agent.
+
+  request.header.missing_content_type:
+    enabled: true
+    applies_to:
+      - request
+    type: header
+    description: Identifies requests to the users endpoint without a JSON content type.
+    match:
+      paths:
+        - /users
+      methods:
+        - POST
+      patterns:
+        - target: header
+          name: content-type
+          pattern: "^(?!application/json(?:;|$)).*"
+    finding:
+      title: Unexpected request content type
+      message: The users endpoint received a request that was not identified as JSON.
+
+  request.body.suspicious_role:
+    enabled: true
+    applies_to:
+      - request
+    type: body_field
+    description: Detects privileged role values in user creation requests.
+    match:
+      paths:
+        - /users
+      methods:
+        - POST
+      fields:
+        - role
+      patterns:
+        - target: field
+          name: role
+          pattern: "(?i)^(admin|administrator|root|superuser)$"
+    finding:
+      title: Privileged user role requested
+      message: A user creation request contained a privileged role value.
+
+  request.body.script_content:
+    enabled: true
+    applies_to:
+      - request
+    type: body_field
+    description: Detects possible script content in request body fields.
+    match:
+      paths:
+        - /users
+      methods:
+        - POST
+      fields:
+        - name
+        - email
+        - role
+      patterns:
+        - target: field
+          name: "*"
+          pattern: "(?i)(<script|javascript:|onerror\\s*=|onload\\s*=)"
+    finding:
+      title: Possible script injection content
+      message: A request body field contained content commonly associated with script injection.

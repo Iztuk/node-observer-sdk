@@ -1,0 +1,128 @@
+openapi: 3.0.3
+
+info:
+  title: Express Test Service
+  version: 1.0.0
+  description: Test API used to validate the API Observer Node.js SDK.
+
+servers:
+  - url: http://localhost:3000
+    description: Local development server
+
+paths:
+  /:
+    get:
+      operationId: getRoot
+      summary: Return a basic greeting
+      responses:
+        "200":
+          description: Greeting returned successfully
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: Hello World!
+
+  /hello:
+    get:
+      operationId: getHello
+      summary: Return a JSON greeting
+      responses:
+        "200":
+          description: Greeting returned successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - message
+                  - requestId
+                properties:
+                  message:
+                    type: string
+                    example: Hello from Express
+                  requestId:
+                    type: string
+                    nullable: true
+                    example: 3cb9c739-a169-4ca6-b6b6-d985237301f8
+
+  /users:
+    post:
+      operationId: createUser
+      summary: Create a test user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateUserRequest"
+            example:
+              name: John
+              email: john@example.com
+              role: developer
+      responses:
+        "201":
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - message
+                  - user
+                properties:
+                  message:
+                    type: string
+                    example: User created
+                  user:
+                    $ref: "#/components/schemas/CreateUserRequest"
+
+        "400":
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /failure:
+    get:
+      operationId: testFailure
+      summary: Trigger an intentional server error
+      responses:
+        "500":
+          description: Intentional test failure
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: Internal Server Error
+
+components:
+  schemas:
+    CreateUserRequest:
+      type: object
+      required:
+        - name
+        - email
+      properties:
+        name:
+          type: string
+          minLength: 1
+          example: John
+        email:
+          type: string
+          format: email
+          example: john@example.com
+        role:
+          type: string
+          example: developer
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          example: Internal Server Error
